@@ -28,12 +28,24 @@ def setup():
 setup_thread = Thread(target=setup)
 setup_thread.start()
 
+# def handleClient(client, client_name):
+
 def acceptConnections():
     global SERVER
     global clients
 
     while(True):
         client, addr = SERVER.accept()
-        print(client,addr)
+        client_name = client.recv(2048).decode().lower()
+        clients[client_name] = {
+            "client": client,
+            "address": addr,
+            "connected_with": "",
+            "file_name": "",
+            "file_size": 4096
+        }
+        print(f"Connection established with {client} ,{addr}")
+        # thread = Thread(target=handleClient, args=(client, client_name))
+        # thread.start()
 
 
