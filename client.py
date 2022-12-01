@@ -16,12 +16,24 @@ song_selected = None
 song_counter = 0
 listbox = None
 infoLabel = None
+mixer.init()
+
+def resume():
+    global song_selected
+    global listbox
+    global infoLabel
+    mixer.music.unpause()
+def pause():
+    global song_selected
+    global listbox
+    global infoLabel
+    mixer.music.pause()
+
 def play():
     global song_selected
     global listbox
     global infoLabel
     song_selected = listbox.get(ANCHOR)
-    pygame.mixer.init()
     mixer.music.load("shared_files/"+song_selected)
     mixer.music.play()
 
@@ -33,9 +45,7 @@ def play():
 def stop():
     global song_selected
     global infoLabel
-    pygame.mixer.init()
-    mixer.music.load("shared_files/"+song_selected)
-    mixer.music.pause()
+    mixer.music.stop()
     infoLabel.configure(text="")
 def setup():
     global CLIENT
@@ -74,13 +84,19 @@ def musicWindow():
     stopButton.place(x=200, y=200)
 
     uploadButton = Button(window, text="Upload", width=10, bd=1, bg="SkyBlue", font=("Calibri", 10))
-    uploadButton.place(x=30, y=250)
+    uploadButton.place(x=30, y=225)
 
     downloadButton = Button(window, text="Download", width=10, bd=1, bg="SkyBlue", font=("Calibri", 10))
-    downloadButton.place(x=200, y=250)
+    downloadButton.place(x=200, y=225)
 
+    resumeButton = Button(window, text="Resume", width=10, bd=1, bg="SkyBlue", font=("Calibri", 10), command=resume)
+    resumeButton.place(x=30, y=250)
+
+    pauseButton = Button(window, text="Pause", width=10, bd=1, bg="SkyBlue", font=("Calibri", 10), command=pause)
+    pauseButton.place(x=200, y=250)
+    
     infoLabel = Label(window, text=" ", fg="blue", font=("Calibri", 8))
-    infoLabel.place(x=4, y=250)
+    infoLabel.place(x=4, y=275)
     window.mainloop()
 
 setup()
