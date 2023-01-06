@@ -8,6 +8,10 @@ import pygame
 from pygame import mixer
 import os
 import time
+import ftplib
+from ftplib import FTP
+import ntpath
+from pathlib import Path
 CLIENT = None
 IP_ADDRESS = "127.0.0.1"
 PORT = 8000
@@ -17,6 +21,60 @@ song_counter = 0
 listbox = None
 infoLabel = None
 mixer.init()
+
+
+def browse_files():
+    global infoLabel
+    global listbox
+    global song_counter
+
+    try:
+        filename = filedialog.askopenfilename()
+        HOSTNAME = "127.0.0.1"
+        USERNAME = "user"
+        PASSWORD = "12345"
+
+        ftp_server = FTP(HOSTNAME, USERNAME, PASSWORD)
+        ftp_server.encoding = "utf-8"
+        ftp_server.cwd('shared_files')
+        fname = ntpath.basename(filename)
+        with open(filename, 'rb') as file:
+            ftp_server.storbinary(f"STOR {fname}", file)
+        ftp_server.dir()
+        ftp_server.quit()
+
+        listbox.insert(song_counter, fname)
+        song_counter = song_counter+1
+    except FileNotFoundError:
+        print("Cancel Button Pressed")
+
+def download():
+    global song_selected
+    song_selected = listbox.get(ANCHOR)
+    song_to_download = listbox.get(ANCHOR)
+    infoLabel.configure(text="Downloading" + song_to_download + "...")
+    HOSTNAME = "127.0.0.1"
+    USERNAME = "user"
+    PASSWORD = "12345"
+    home = str(Path.home())
+    download_path = home+"\\Downloads"
+    download_path="E:\Downloads"
+    ftp_server = ftplib.FTP(HOSTNAME, USERNAME, PASSWORD)
+    ftp_server.encoding = "utf-8"
+    ftp_server.cwd("shared_files")
+    local_file_name =  os.path.join(download_path, song_to_download)
+    file = open(local_file_name, 'wb')
+    ftp_server.retrbinary('RETR '+ song_to_download, file.write)
+    ftp_server.dir()
+    file.close()
+    ftp_server.quit()
+    infoLabel.configure(text="Succesfully downloaded " + song_to_download)
+    time.sleep(1)
+    print(song_selected)
+    if song_selected != "":
+        infoLabel.configure(text="Now playing " + song_selected)
+    else:
+        infoLabel.configure(text="")
 
 def resume():
     global song_selected
@@ -83,10 +141,10 @@ def musicWindow():
     stopButton = Button(window, bd=1, command=stop, text="Stop", width=10, bg="SkyBlue", font=("Calibri", 10))
     stopButton.place(x=200, y=200)
 
-    uploadButton = Button(window, text="Upload", width=10, bd=1, bg="SkyBlue", font=("Calibri", 10))
+    uploadButton = Button(window, text="Upload", width=10, bd=1, bg="SkyBlue", font=("Calibri", 10), command=browse_files)
     uploadButton.place(x=30, y=225)
 
-    downloadButton = Button(window, text="Download", width=10, bd=1, bg="SkyBlue", font=("Calibri", 10))
+    downloadButton = Button(window, text="Download", width=10, bd=1, bg="SkyBlue", font=("Calibri", 10), command=download)
     downloadButton.place(x=200, y=225)
 
     resumeButton = Button(window, text="Resume", width=10, bd=1, bg="SkyBlue", font=("Calibri", 10), command=resume)

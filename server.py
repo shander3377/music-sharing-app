@@ -1,11 +1,24 @@
 import socket
 from threading import Thread
+from pyftpdlib.authorizers import DummyAuthorizer
+from pyftpdlib.handlers import FTPHandler
+from pyftpdlib.servers import FTPServer
+import os
 SERVER = None
 IP_ADDRESS = "127.0.0.1"
 PORT = 8000
 BUFFER_SIZE = 4096
 clients = {}
-
+if(not os.path.isdir('shared_files')):
+    os.makedirs('shared_files')
+def ftp():
+    global IP_ADDRESS
+    authorizer = DummyAuthorizer()
+    authorizer.add_user('user', '12345',".", perm='elradfmw')
+    handler = FTPHandler
+    handler.authorizer = authorizer
+    ftp_server = FTPServer((IP_ADDRESS, 21), handler)
+    ftp_server.serve_forever()
 def setup():
     global SERVER
     global IP_ADDRESS
@@ -28,6 +41,8 @@ def setup():
 setup_thread = Thread(target=setup)
 setup_thread.start()
 
+ftp_thread = Thread(target=ftp)
+ftp_thread.start()
 # def handleClient(client, client_name):
 
 def acceptConnections():
